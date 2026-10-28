@@ -1,28 +1,15 @@
 package vista;
 
-import modelo.AlgoritmoGoloso;
-import modelo.Grafo;
-import modelo.Solucion;
+import presenter.Presenter;
 
 public class Principal {
 
     public static void main(String[] args) {
 
-        Grafo g = new Grafo(6);
+        Presenter presenter = new Presenter();
 
-        g.agregarArista(6, 4);
-        g.agregarArista(4, 5);
-        g.agregarArista(5, 1);
-        g.agregarArista(5, 2);
-        g.agregarArista(1, 2);
-        g.agregarArista(2, 3);
-        g.agregarArista(3, 4);
+        VentanaPrincipal ventana = new VentanaPrincipal(presenter);
 
-        AlgoritmoGoloso algoritmo = new AlgoritmoGoloso();
-
-        Solucion ret = algoritmo.conjuntoDominante(g);
-
-        System.out.println("Conjunto dominante: " + ret);
-        System.out.println("Es dominante: " + g.esDominante(ret));
+        ventana.setVisible(true);
     }
 }
