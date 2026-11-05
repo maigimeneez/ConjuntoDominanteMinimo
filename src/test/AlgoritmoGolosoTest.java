@@ -2,11 +2,14 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Random;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import modelo.AlgoritmoGoloso;
 import modelo.Grafo;
-import java.util.ArrayList;
+import modelo.Solucion;
 
 class AlgoritmoGolosoTest {
 
@@ -17,63 +20,144 @@ class AlgoritmoGolosoTest {
         algoritmo = new AlgoritmoGoloso();
     }
 
-//    @Test
-//    void testGrafoLineal() {
-//        // Grafo de 3 vértices en línea: 1 - 2 - 3
-//        Grafo grafo = new Grafo(3);
-//        grafo.agregarArista(1, 2);
-//        grafo.agregarArista(2, 3);
-//
-//        ArrayList<Integer> resultado = algoritmo.conjuntoDominante(grafo);
-//
-//        // El vértice 2 domina a 1, 2 y 3, por lo que el conjunto dominante óptimo y goloso es {2}
-//        assertNotNull(resultado);
-//        assertTrue(resultado.contains(2));
-//        
-//        // Verificamos que cubra todos los vértices del grafo
-//        assertEquals(1, resultado.size());
-//    }
+    private Grafo grafoCon(int n, int[][] aristas) {
+        Grafo g = new Grafo(n);
+        for (int[] a : aristas)
+            g.agregarArista(a[0], a[1]);
+        return g;
+    }
 
-//    @Test
-//    void testGrafoEstrella() {
-//        // Grafo estrella: el vértice 1 está conectado con 2, 3 y 4
-//        Grafo grafo = new Grafo(4);
-//        grafo.agregarArista(1, 2);
-//        grafo.agregarArista(1, 3);
-//        grafo.agregarArista(1, 4);
-//
-//        ArrayList<Integer> resultado = algoritmo.conjuntoDominante(grafo);
-//
-//        // El vértice 1 es el centro y domina a todos por sí mismo
-//        assertEquals(1, resultado.size());
-//        assertEquals(1, resultado.get(0));
-//    }
-//
-//    @Test
-//    void testGrafoDesconectado() {
-//        // Grafo sin aristas (vértices 1, 2, 3 aislados)
-//        Grafo grafo = new Grafo(3);
-//
-//        ArrayList<Integer> resultado = algoritmo.conjuntoDominante(grafo);
-//
-//        // Como no hay aristas, cada vértice debe dominarse a sí mismo
-//        assertEquals(3, resultado.size());
-//        assertTrue(resultado.contains(1));
-//        assertTrue(resultado.contains(2));
-//        assertTrue(resultado.contains(3));
-//    }
-//
-//    @Test
-//    void testGrafoCompleto() {
-//        // Grafo completo de 3 vértices (todos conectados entre sí)
-//        Grafo grafo = new Grafo(3);
-//        grafo.agregarArista(1, 2);
-//        grafo.agregarArista(1, 3);
-//        grafo.agregarArista(2, 3);
-//
-//        ArrayList<Integer> resultado = algoritmo.conjuntoDominante(grafo);
-//
-//        // Con elegir cualquiera de los vértices ya se dominan los 3
-//        assertEquals(1, resultado.size());
-//    }
+    @Test
+    void testUnSoloVertice() {
+        Grafo g = new Grafo(1);
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(1, s.tamano());
+        assertTrue(s.contiene(1));
+    }
+
+    @Test
+    void testGrafoSinAristas() {
+        Grafo g = new Grafo(3);
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(3, s.tamano());
+        assertTrue(s.contiene(1));
+        assertTrue(s.contiene(2));
+        assertTrue(s.contiene(3));
+        assertTrue(g.esDominante(s));
+    }
+
+    @Test
+    void testGrafoLineal() {
+        Grafo g = grafoCon(3, new int[][] { {1, 2}, {2, 3} });
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(1, s.tamano());
+        assertTrue(s.contiene(2));
+        assertTrue(g.esDominante(s));
+    }
+
+    @Test
+    void testGrafoEstrella() {
+        Grafo g = grafoCon(4, new int[][] { {1, 2}, {1, 3}, {1, 4} });
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(1, s.tamano());
+        assertTrue(s.contiene(1));
+        assertTrue(g.esDominante(s));
+    }
+
+    @Test
+    void testGrafoCompleto() {
+        Grafo g = grafoCon(4, new int[][] {
+            {1, 2}, {1, 3}, {1, 4}, {2, 3}, {2, 4}, {3, 4}
+        });
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(1, s.tamano());
+        assertTrue(g.esDominante(s));
+    }
+
+    @Test
+    void testCaminoDeCuatroVertices() {
+        Grafo g = grafoCon(4, new int[][] { {1, 2}, {2, 3}, {3, 4} });
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(2, s.tamano());
+        assertTrue(g.esDominante(s));
+    }
+
+    @Test
+    void testGrafoDesconectado() {
+        Grafo g = grafoCon(4, new int[][] { {1, 2}, {3, 4} });
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(2, s.tamano());
+        assertTrue(g.esDominante(s));
+    }
+
+    @Test
+    void testGrafoDeLaFiguraDelEnunciado() {
+        Grafo g = grafoCon(6, new int[][] {
+            {6, 4}, {4, 5}, {4, 3}, {5, 1}, {5, 2}, {1, 2}, {2, 3}
+        });
+
+        Solucion s = algoritmo.conjuntoDominante(g);
+
+        assertEquals(2, s.tamano());
+        assertTrue(g.esDominante(s));
+    }
+
+    @Test
+    void testResultadoDeterminista() {
+        Grafo g = grafoCon(6, new int[][] {
+            {6, 4}, {4, 5}, {4, 3}, {5, 1}, {5, 2}, {1, 2}, {2, 3}
+        });
+
+        Solucion s1 = algoritmo.conjuntoDominante(g);
+        Solucion s2 = algoritmo.conjuntoDominante(g);
+
+        assertEquals(s1.toString(), s2.toString());
+    }
+
+    @Test
+    void testNoModificaElGrafo() {
+        Grafo g = grafoCon(3, new int[][] { {1, 2}, {2, 3} });
+
+        algoritmo.conjuntoDominante(g);
+
+        assertTrue(g.existeArista(1, 2));
+        assertTrue(g.existeArista(2, 3));
+        assertFalse(g.existeArista(1, 3));
+    }
+
+    @Test
+    void testSiempreDevuelveConjuntoDominante() {
+        Random random = new Random(42);
+
+        for (int intento = 0; intento < 200; intento++) {
+
+            int n = 2 + random.nextInt(25);
+            Grafo g = new Grafo(n);
+
+            for (int i = 1; i <= n; i++)
+                for (int j = i + 1; j <= n; j++)
+                    if (random.nextDouble() < 0.3)
+                        g.agregarArista(i, j);
+
+            Solucion s = algoritmo.conjuntoDominante(g);
+
+            assertTrue(g.esDominante(s),
+                    "No es dominante: " + s + " con n=" + n);
+            assertTrue(s.tamano() <= n);
+        }
+    }
 }
